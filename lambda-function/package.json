@@ -1,0 +1,18 @@
+{
+  "name": "lambda-function",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild index.js --bundle --platform=node --target=node14 --outfile=dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "aws-sdk": "^2.1692.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.8"
+  }
+}
