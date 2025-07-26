@@ -1,0 +1,14 @@
+# Node.js dependencies
+lambda-function/node_modules/
+
+# Logs
+*.log
+*.out
+*.err
+
+# AWS Lambda specific (for Lambda deployment)
+*.zip
+*.tgz
+
+# IDE/Editor folders (e.g., VSCode, Sublime)
+.vscode/
