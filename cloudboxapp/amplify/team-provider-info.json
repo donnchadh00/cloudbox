@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-cloudboxapp-dev-2a386-authRole",
+      "UnauthRoleArn": "arn:aws:iam::884348119413:role/amplify-cloudboxapp-dev-2a386-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::884348119413:role/amplify-cloudboxapp-dev-2a386-authRole",
+      "Region": "eu-north-1",
+      "DeploymentBucketName": "amplify-cloudboxapp-dev-2a386-deployment",
+      "UnauthRoleName": "amplify-cloudboxapp-dev-2a386-unauthRole",
+      "StackName": "amplify-cloudboxapp-dev-2a386",
+      "StackId": "arn:aws:cloudformation:eu-north-1:884348119413:stack/amplify-cloudboxapp-dev-2a386/7d6b1190-6bef-11f0-ad06-069b6916132f",
+      "AmplifyAppId": "d3ieaxk06lrkwj"
+    },
+    "categories": {
+      "auth": {
+        "cloudboxappc5845a23": {}
+      }
+    }
+  }
+}
