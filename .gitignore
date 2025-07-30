@@ -12,3 +12,5 @@ lambda-function/node_modules/
 
 # IDE/Editor folders (e.g., VSCode, Sublime)
 .vscode/
+
+node_modules/
