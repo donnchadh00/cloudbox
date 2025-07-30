@@ -1,6 +1,12 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Methods': '*'
+};
+
 exports.handler = async (event) => {
     const bucketName = 'cloudbox-storage-donnchadh00';
 
@@ -24,6 +30,7 @@ exports.handler = async (event) => {
             default:
                 return {
                     statusCode: 400,
+                    headers: corsHeaders,
                     body: JSON.stringify({ error: 'Invalid method' })
                 };
         }
@@ -31,6 +38,7 @@ exports.handler = async (event) => {
         console.error('Error:', err);
         return {
             statusCode: 500,
+            headers: corsHeaders,
             body: JSON.stringify({ error: err.message })
         };
     }
@@ -49,6 +57,7 @@ async function uploadFile(bucketName, fileName, fileContent) {
         const result = await s3.putObject(params).promise();
         return {
             statusCode: 200,
+            headers: corsHeaders,
             body: JSON.stringify({
                 message: 'File uploaded successfully!',
                 result: result
@@ -58,6 +67,7 @@ async function uploadFile(bucketName, fileName, fileContent) {
         console.error('Error uploading file:', err);
         return {
             statusCode: 500,
+            headers: corsHeaders,
             body: JSON.stringify({ error: 'Could not upload file', details: err.message })
         };
     }
@@ -74,6 +84,7 @@ async function listFiles(bucketName) {
         const fileNames = data.Contents.map(item => item.Key);
         return {
             statusCode: 200,
+            headers: corsHeaders,
             body: JSON.stringify({
                 message: 'Files listed successfully',
                 files: fileNames
@@ -83,6 +94,7 @@ async function listFiles(bucketName) {
         console.error('Error listing files:', err);
         return {
             statusCode: 500,
+            headers: corsHeaders,
             body: JSON.stringify({
                 error: 'Could not list files',
                 details: err.message
@@ -102,6 +114,7 @@ async function deleteFile(bucketName, fileName) {
         const data = await s3.deleteObject(params).promise();
         return {
             statusCode: 200,
+            headers: corsHeaders,
             body: JSON.stringify({
                 message: 'File deleted successfully',
                 result: data
@@ -111,6 +124,7 @@ async function deleteFile(bucketName, fileName) {
         console.error('Error deleting file:', err);
         return {
             statusCode: 500,
+            headers: corsHeaders,
             body: JSON.stringify({
                 error: 'Could not delete file',
                 details: err.message
