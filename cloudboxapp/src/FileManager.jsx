@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ClipLoader } from 'react-spinners';
 import { useRef } from 'react';
+import defaultFileIcon from './assets/file-icon.svg';
 
 const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v3/files'
 
@@ -10,6 +11,7 @@ export default function FileManager() {
   const [loadingList, setLoadingList] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deletingFile, setDeletingFile] = useState(null)
+  const [downloadingFile, setDownloadingFile] = useState(null);
   const fileInputRef = useRef();
   const [previews, setPreviews] = useState({});
 
@@ -98,6 +100,28 @@ function formatDate(dateStr) {
     }
   }
 
+  const handleDownload = async (fileName) => {
+    setDownloadingFile(fileName);
+
+    try {
+      const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`);
+      const data = await res.json();
+      const url = data.url;
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error downloading file:', err);
+      alert('Failed to download file');
+    } finally {
+      setDownloadingFile(null);
+    }
+  };
+
   useEffect(() => {
     const fetchPreviews = async () => {
       const imageFiles = files.filter(f =>
@@ -123,7 +147,6 @@ function formatDate(dateStr) {
 
   return (
     <div className="p-4">
-      {/* <h2 className="text-xl font-bold mb-4">File Manager</h2> */}
       <h2 className="text-3xl font-semibold text-gray-800 mb-6 border-b pb-2">
         📁 File Manager
       </h2>
@@ -166,8 +189,9 @@ function formatDate(dateStr) {
             <li key={file.key} className="flex items-center justify-between py-3">
               <div className="flex items-center gap-4">
                 <img
-                  src={previews[file.key] || '/placeholder.png'}
+                  src={previews[file.key] || defaultFileIcon}
                   alt={file.key}
+                  title={file.key}
                   className="w-12 h-12 object-cover rounded border"
                 />
                 <span className="font-medium text-gray-800">{file.key}</span>
@@ -181,12 +205,29 @@ function formatDate(dateStr) {
                 <span className="text-gray-600 text-sm">
                   {formatFileSize(file.size)}
                 </span>
-                <button
-                  onClick={() => deleteFile(file.key)}
-                  className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
+
+                {deletingFile === file.key ? (
+                  <span className="ml-2 text-sm text-red-500 animate-pulse">Deleting...</span>
+                ) : (
+                  <button
+                    onClick={() => deleteFile(file.key)}
+                    className="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                )}
+
+                {downloadingFile === file.key ? (
+                  <span className="ml-2 text-sm text-gray-500 animate-pulse">Downloading...</span>
+                ) : (
+                  <button
+                    onClick={() => handleDownload(file.key)}
+                    className="ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Download
+                  </button>
+                )}
+
               </div>
             </li>
           ))}
