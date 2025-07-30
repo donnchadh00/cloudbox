@@ -11,6 +11,27 @@ export default function FileManager() {
   const [uploading, setUploading] = useState(false)
   const [deletingFile, setDeletingFile] = useState(null)
   const fileInputRef = useRef();
+  const [previews, setPreviews] = useState({});
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatDate(dateStr) {
+  const date = new Date(dateStr)
+  return date.toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+}
+
+  const getImagePreviewUrl = async (fileName) => {
+    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`);
+    const data = await res.json();
+    return data.url;
+  };
 
   const fetchFiles = async () => {
     setLoadingList(true)
@@ -78,22 +99,60 @@ export default function FileManager() {
   }
 
   useEffect(() => {
+    const fetchPreviews = async () => {
+      const imageFiles = files.filter(f =>
+        f.key.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+      );
+
+      const entries = await Promise.all(
+        imageFiles.map(async (f) => {
+          const url = await getImagePreviewUrl(f.key);
+          return [f.key, url];
+        })
+      );
+
+      setPreviews(Object.fromEntries(entries));
+    };
+
+    if (files.length) fetchPreviews();
+  }, [files]);
+
+  useEffect(() => {
     fetchFiles()
   }, [])
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">File Manager</h2>
+      {/* <h2 className="text-xl font-bold mb-4">File Manager</h2> */}
+      <h2 className="text-3xl font-semibold text-gray-800 mb-6 border-b pb-2">
+        📁 File Manager
+      </h2>
 
-      <div className="mb-4">
-        <input type="file"
-          ref={fileInputRef}
-          onChange={(e) => setFile(e.target.files[0])} 
-        />
+      <div className="flex items-center gap-4 mt-6">
+        {/* Choose File Button */}
+        <label className="relative inline-block cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Choose File
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+          />
+        </label>
+
+        {/* File Name Display */}
+        <div className="text-sm text-gray-600 border border-gray-300 rounded px-3 py-2 w-64 truncate">
+          {file ? file.name : 'No file chosen'}
+        </div>
+
+        {/* Upload Button */}
         <button
           onClick={uploadFile}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded"
           disabled={!file || uploading}
+          className={`px-4 py-2 rounded text-white ${
+            !file || uploading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-green-600 hover:bg-green-700'
+          }`}
         >
           {uploading ? 'Uploading...' : 'Upload'}
         </button>
@@ -102,17 +161,33 @@ export default function FileManager() {
       {loadingList ? (
         <ClipLoader size={20} color="#3b82f6" />
       ) : (
-        <ul className="mt-6 space-y-2">
-          {files.map((f) => (
-            <li key={f} className="flex items-center">
-              {f}
-              <button
-                onClick={() => deleteFile(f)}
-                className="ml-2 px-2 py-1 bg-red-500 text-white rounded"
-                disabled={deletingFile === f}
-              >
-                {deletingFile === f ? 'Deleting...' : 'Delete'}
-              </button>
+        <ul className="mt-6 divide-y divide-gray-200">
+          {files.map((file) => (
+            <li key={file.key} className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-4">
+                <img
+                  src={previews[file.key] || '/placeholder.png'}
+                  alt={file.key}
+                  className="w-12 h-12 object-cover rounded border"
+                />
+                <span className="font-medium text-gray-800">{file.key}</span>
+              </div>
+
+              <div className="text-gray-500 text-sm">
+                {formatDate(file.lastModified)}
+              </div>
+
+              <div className="flex items-center gap-4">
+                <span className="text-gray-600 text-sm">
+                  {formatFileSize(file.size)}
+                </span>
+                <button
+                  onClick={() => deleteFile(file.key)}
+                  className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
