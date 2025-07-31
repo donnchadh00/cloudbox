@@ -15,6 +15,7 @@ export default function FileManager() {
   const [downloadingFile, setDownloadingFile] = useState(null);
   const fileInputRef = useRef();
   const [previews, setPreviews] = useState({});
+  const [isDragging, setIsDragging] = useState(false);
 
 function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`
@@ -159,30 +160,52 @@ function formatDate(dateStr) {
         📁 File Manager
       </h2>
 
-      <div className="flex items-center gap-4 mt-6">
-        {/* Choose File Button */}
-        <label className="relative inline-block cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          const droppedFile = e.dataTransfer.files[0];
+          if (droppedFile) {
+            setFile(droppedFile);
+          }
+        }}
+        className={`border-2 border-dashed rounded p-6 flex flex-col items-center justify-center ${
+          isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+        }`}
+      >
+        <p className="text-sm mb-3 text-gray-600">
+          Drag & drop a file here or use the file picker below
+        </p>
+
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+          className="hidden"
+          id="fileInput"
+        />
+        <label
+          htmlFor="fileInput"
+          className="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded cursor-pointer"
+        >
           Choose File
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
         </label>
 
-        {/* File Name Display */}
-        <div className="text-sm text-gray-600 border border-gray-300 rounded px-3 py-2 w-64 truncate">
-          {file ? file.name : 'No file chosen'}
-        </div>
-
-        {/* Upload Button */}
+        {file && (
+          <p className="mt-2 text-sm text-gray-600">Selected: {file.name}</p>
+        )}
+        
         <button
           onClick={uploadFile}
           disabled={!file || uploading}
-          className={`px-4 py-2 rounded text-white ${
+          className={`mt-4 px-4 py-2 rounded text-white ${
             !file || uploading
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-green-600 hover:bg-green-700'
+              : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
           {uploading ? 'Uploading...' : 'Upload'}
