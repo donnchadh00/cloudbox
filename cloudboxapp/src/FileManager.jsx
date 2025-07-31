@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ClipLoader } from 'react-spinners';
 import { useRef } from 'react';
 import defaultFileIcon from './assets/file-icon.svg';
+import toast from 'react-hot-toast';
 
 const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v3/files'
 
@@ -43,6 +44,7 @@ function formatDate(dateStr) {
       setFiles(data.files || [])
     } catch (err) {
       console.error('Error fetching files:', err)
+      toast.error('Failed to load file list');
     } finally {
       setLoadingList(false)
     }
@@ -70,9 +72,11 @@ function formatDate(dateStr) {
 
         const data = await res.json()
         console.log(data.message)
+        toast.success('File uploaded successfully');
         fetchFiles()
       } catch (err) {
         console.error('Upload failed:', err)
+        toast.error('Failed to upload file');
       } finally {
         setUploading(false)
         fileInputRef.current.value = '';
@@ -92,9 +96,11 @@ function formatDate(dateStr) {
 
       const data = await res.json()
       console.log(data.message)
+      toast.success(`Deleted ${fileName}`);
       fetchFiles()
     } catch (err) {
       console.error('Delete failed:', err)
+      toast.error('Failed to delete file');
     } finally {
       setDeletingFile(null)
     }
@@ -114,9 +120,11 @@ function formatDate(dateStr) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      toast.success('Download started');
     } catch (err) {
       console.error('Error downloading file:', err);
       alert('Failed to download file');
+      toast.error('Download failed');
     } finally {
       setDownloadingFile(null);
     }
