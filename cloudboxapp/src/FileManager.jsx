@@ -8,14 +8,13 @@ const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v3/file
 
 export default function FileManager() {
   const [files, setFiles] = useState([])
-  const [file, setFile] = useState(null)
   const [loadingList, setLoadingList] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deletingFile, setDeletingFile] = useState(null)
   const [downloadingFile, setDownloadingFile] = useState(null);
-  const fileInputRef = useRef();
   const [previews, setPreviews] = useState({});
   const [isDragging, setIsDragging] = useState(false);
+  const [filesToUpload, setFilesToUpload] = useState([]);
 
 function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`
@@ -51,42 +50,47 @@ function formatDate(dateStr) {
     }
   }
 
-  const uploadFile = async () => {
-    if (!file) return
-    setUploading(true)
+  const uploadFiles = async () => {
+    setUploading(true);
 
-    const reader = new FileReader()
-    reader.onloadend = async () => {
-      const base64 = reader.result.split(',')[1]
-
+    for (const file of filesToUpload) {
       try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            fileName: file.name,
-            fileContent: base64
-          })
-        })
+        const reader = new FileReader();
 
-        const data = await res.json()
-        console.log(data.message)
-        toast.success('File uploaded successfully');
-        fetchFiles()
+        await new Promise((resolve, reject) => {
+          reader.onloadend = async () => {
+            const base64 = reader.result.split(',')[1];
+
+            const res = await fetch(API_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                fileName: file.name,
+                fileContent: base64,
+              }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Upload failed');
+            toast.success(`Uploaded: ${file.name}`);
+            resolve();
+          };
+
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
       } catch (err) {
-        console.error('Upload failed:', err)
-        toast.error('Failed to upload file');
-      } finally {
-        setUploading(false)
-        fileInputRef.current.value = '';
-        setFile(null)
+        console.error('Error uploading:', err);
+        toast.error(`Failed to upload ${file.name}`);
       }
     }
 
-    reader.readAsDataURL(file)
-  }
+    setUploading(false);
+    setFilesToUpload([]);
+    fetchFiles();
+  };
 
   const deleteFile = async (fileName) => {
     setDeletingFile(fileName)
@@ -169,9 +173,9 @@ function formatDate(dateStr) {
         onDrop={(e) => {
           e.preventDefault();
           setIsDragging(false);
-          const droppedFile = e.dataTransfer.files[0];
-          if (droppedFile) {
-            setFile(droppedFile);
+          const droppedFiles = Array.from(e.dataTransfer.files);
+          if (droppedFiles.length) {
+            setFilesToUpload(droppedFiles);
           }
         }}
         className={`border-2 border-dashed rounded p-6 flex flex-col items-center justify-center ${
@@ -184,7 +188,8 @@ function formatDate(dateStr) {
 
         <input
           type="file"
-          onChange={(e) => setFile(e.target.files[0])}
+          multiple
+          onChange={(e) => setFilesToUpload(Array.from(e.target.files))}
           className="hidden"
           id="fileInput"
         />
@@ -195,15 +200,19 @@ function formatDate(dateStr) {
           Choose File
         </label>
 
-        {file && (
-          <p className="mt-2 text-sm text-gray-600">Selected: {file.name}</p>
+        {filesToUpload.length > 0 && (
+          <ul className="mt-2 text-sm text-gray-600 list-disc list-inside">
+            {filesToUpload.map((f) => (
+              <li key={f.name}>{f.name}</li>
+            ))}
+          </ul>
         )}
         
         <button
-          onClick={uploadFile}
-          disabled={!file || uploading}
+          onClick={uploadFiles}
+          disabled={!filesToUpload.length === 0 || uploading}
           className={`mt-4 px-4 py-2 rounded text-white ${
-            !file || uploading
+            !files || uploading
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
