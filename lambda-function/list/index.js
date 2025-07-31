@@ -20,12 +20,16 @@ exports.handler = async (event) => {
       Bucket: 'cloudbox-storage-donnchadh00'
     }).promise();
 
-    const fileNames = data.Contents.map(item => item.Key);
+    const fileList = data.Contents.map(item => ({
+      key: item.Key,
+      size: item.Size,
+      lastModified: item.LastModified
+    }));
 
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: JSON.stringify({ files: fileNames })
+      body: JSON.stringify({ files: fileList })
     };
   } catch (err) {
     return {

@@ -10,7 +10,7 @@ const corsHeaders = {
 exports.handler = async (event) => {
 
   const bucketName = 'cloudbox-storage-donnchadh00';
-  const fileName = event.pathParameters?.fileName;
+  const fileName = decodeURIComponent(event.pathParameters?.fileName || '');
 
   if (!fileName) {
     return {
