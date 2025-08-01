@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { ClipLoader } from 'react-spinners';
-import { useRef } from 'react';
-import defaultFileIcon from './assets/file-icon.svg';
+import defaultFileIcon from './assets/icon-doc.svg';
 import toast from 'react-hot-toast';
+import { fetchAuthSession } from 'aws-amplify/auth';
 
-const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v3/files'
+const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v4/files'
 
 export default function FileManager() {
   const [files, setFiles] = useState([])
@@ -15,6 +15,7 @@ export default function FileManager() {
   const [previews, setPreviews] = useState({});
   const [isDragging, setIsDragging] = useState(false);
   const [filesToUpload, setFilesToUpload] = useState([]);
+  const [userEmail, setUserEmail] = useState('');
 
 function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`
@@ -31,15 +32,38 @@ function formatDate(dateStr) {
 }
 
   const getImagePreviewUrl = async (fileName) => {
-    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`);
+    const session = await fetchAuthSession()
+    const token = session.tokens?.idToken?.toString();
+    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+    });
     const data = await res.json();
     return data.url;
   };
 
   const fetchFiles = async () => {
     setLoadingList(true)
+    const session = await fetchAuthSession()
+    const token = session.tokens?.idToken?.toString();
+
+    if (!token) {
+      throw new Error('No valid auth token found');
+    }
+
+    console.log("token is: " + token)
+
     try {
-      const res = await fetch(API_URL)
+      const res = await fetch(API_URL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+    });
       const data = await res.json()
       setFiles(data.files || [])
     } catch (err) {
@@ -53,6 +77,21 @@ function formatDate(dateStr) {
   const uploadFiles = async () => {
     setUploading(true);
 
+    let token;
+    try {
+      const session = await fetchAuthSession();
+      token = session.tokens?.idToken?.toString();
+
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+    } catch (err) {
+      toast.error('User authentication failed');
+      console.error('Auth error:', err);
+      setUploading(false);
+      return;
+    }
+
     for (const file of filesToUpload) {
       try {
         const reader = new FileReader();
@@ -65,6 +104,7 @@ function formatDate(dateStr) {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify({
                 fileName: file.name,
@@ -94,10 +134,16 @@ function formatDate(dateStr) {
 
   const deleteFile = async (fileName) => {
     setDeletingFile(fileName)
+    const session = await fetchAuthSession()
+    const token = session.tokens?.idToken?.toString();
     try {
       const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
-        method: 'DELETE'
-      })
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+    });
 
       const data = await res.json()
       console.log(data.message)
@@ -113,9 +159,16 @@ function formatDate(dateStr) {
 
   const handleDownload = async (fileName) => {
     setDownloadingFile(fileName);
-
+    const session = await fetchAuthSession()
+    const token = session.tokens?.idToken?.toString();
     try {
-      const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`);
+      const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+    });
       const data = await res.json();
       const url = data.url;
 
@@ -134,6 +187,22 @@ function formatDate(dateStr) {
       setDownloadingFile(null);
     }
   };
+
+  useEffect(() => {
+    const getUserEmail = async () => {
+      try {
+        const session = await fetchAuthSession();
+        const email = session.tokens?.idToken?.payload?.email;
+        if (email) {
+          setUserEmail(email);
+        }
+      } catch (err) {
+        console.error('Failed to get user email:', err);
+      }
+    };
+
+    getUserEmail();
+  }, []);
 
   useEffect(() => {
     const fetchPreviews = async () => {
@@ -162,6 +231,11 @@ function formatDate(dateStr) {
     <div className="p-4">
       <h2 className="text-3xl font-semibold text-gray-800 mb-6 border-b pb-2">
         📁 File Manager
+        {userEmail && (
+          <span className="text-base font-normal text-gray-500">
+            ({userEmail})
+          </span>
+        )}
       </h2>
 
       <div
@@ -234,7 +308,7 @@ function formatDate(dateStr) {
                   title={file.key}
                   className="w-12 h-12 object-cover rounded border"
                 />
-                <span className="font-medium text-gray-800">{file.key}</span>
+                <span className="font-medium text-gray-800">{file.key.split('/').pop()}</span>
               </div>
 
               <div className="text-gray-500 text-sm">
@@ -250,7 +324,7 @@ function formatDate(dateStr) {
                   <span className="ml-2 text-sm text-red-500 animate-pulse">Deleting...</span>
                 ) : (
                   <button
-                    onClick={() => deleteFile(file.key)}
+                    onClick={() => deleteFile(file.key.split('/').pop())}
                     className="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                   >
                     Delete
