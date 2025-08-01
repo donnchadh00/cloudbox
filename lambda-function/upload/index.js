@@ -9,30 +9,34 @@ const corsHeaders = {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: corsHeaders, body: '' };
+    return { 
+      statusCode: 200, 
+      headers: corsHeaders, 
+      body: '' };
   }
 
-  try {
-    const body = JSON.parse(event.body || '{}');
-    fileName = body.fileName;
-    fileContent = body.fileContent;
+  const bucketName = 'cloudbox-storage-donnchadh00';
+  const userId = event.requestContext?.authorizer?.claims?.sub;
+  const body = JSON.parse(event.body || '{}');
+  fileName = body.fileName;
+  fileContent = body.fileContent;
+  const key = `${userId}/${fileName}`;
 
-    if (!fileName || !fileContent) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Missing fileName or fileContent' }),
-      };
-    }
+  if (!fileName || !fileContent) {
+    return {
+      statusCode: 400,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Missing fileName or fileContent' }),
+    };
+  }
 
-    const params = {
-      Bucket: 'cloudbox-storage-donnchadh00',
-      Key: fileName,
+  try {  
+    await s3.putObject({
+      Bucket: bucketName,
+      Key: key,
       Body: Buffer.from(fileContent, 'base64'),
       ContentType: 'application/octet-stream',
-    };
-
-    await s3.putObject(params).promise();
+    }).promise();
 
     return {
       statusCode: 200,

@@ -8,9 +8,25 @@ const corsHeaders = {
 };
 
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { 
+      statusCode: 200, 
+      headers: corsHeaders, 
+      body: '' };
+  }
 
   const bucketName = 'cloudbox-storage-donnchadh00';
+  const userId = event.requestContext?.authorizer?.claims?.sub;
   const fileName = decodeURIComponent(event.pathParameters?.fileName || '');
+  const key = `${userId}/${fileName}`;
+
+  if (!userId) {
+    return {
+      statusCode: 401,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Unauthorized: user ID missing' }),
+    };
+  }
 
   if (!fileName) {
     return {
@@ -24,7 +40,7 @@ exports.handler = async (event) => {
     const url = s3.getSignedUrl('getObject', {
       Bucket: bucketName,
       Key: fileName,
-      Expires: 60 // 1 minute URL
+      Expires: 60
     });
 
     return {
