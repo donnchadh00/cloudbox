@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
-import { ClipLoader } from 'react-spinners';
-import defaultFileIcon from './assets/icon-doc.svg';
 import toast from 'react-hot-toast';
 import { fetchAuthSession } from 'aws-amplify/auth';
-import { formatFileSize, formatDate } from './utils/formatters.js';
 import {
   fetchFileList,
   uploadFileToS3,
@@ -13,6 +10,7 @@ import {
   getAuthToken,
 } from './services/s3Service';
 import FileUploader from './features/fileManager/FileUploader.jsx';
+import FileList from './features/fileManager/FileList.jsx';
 
 export default function FileManager() {
   const [files, setFiles] = useState([])
@@ -162,58 +160,16 @@ export default function FileManager() {
         files={files}
       />
 
-      {loadingList ? (
-        <ClipLoader size={20} color="#3b82f6" />
-      ) : (
-        <ul className="mt-6 divide-y divide-gray-200">
-          {files.map((file) => (
-            <li key={file.key} className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-4">
-                <img
-                  src={previews[file.key] || defaultFileIcon}
-                  alt={file.key}
-                  title={file.key}
-                  className="w-12 h-12 object-cover rounded border"
-                />
-                <span className="font-medium text-gray-800">{file.key.split('/').pop()}</span>
-              </div>
+      <FileList
+        files={files}
+        previews={previews}
+        deletingFile={deletingFile}
+        downloadingFile={downloadingFile}
+        onDelete={deleteFile}
+        onDownload={handleDownload}
+        loading={loadingList}
+      />
 
-              <div className="text-gray-500 text-sm">
-                {formatDate(file.lastModified)}
-              </div>
-
-              <div className="flex items-center gap-4">
-                <span className="text-gray-600 text-sm">
-                  {formatFileSize(file.size)}
-                </span>
-
-                {deletingFile === file.key ? (
-                  <span className="ml-2 text-sm text-red-500 animate-pulse">Deleting...</span>
-                ) : (
-                  <button
-                    onClick={() => deleteFile(file.key.split('/').pop())}
-                    className="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                )}
-
-                {downloadingFile === file.key ? (
-                  <span className="ml-2 text-sm text-gray-500 animate-pulse">Downloading...</span>
-                ) : (
-                  <button
-                    onClick={() => handleDownload(file.key)}
-                    className="ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                  >
-                    Download
-                  </button>
-                )}
-
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   )
 }
