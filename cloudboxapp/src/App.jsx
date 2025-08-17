@@ -4,6 +4,7 @@ import { generateClient } from 'aws-amplify/data';
 import './App.css'
 import FileManager from './FileManager';
 import { Toaster } from 'react-hot-toast';
+import MainLayout from './layout/MainLaoyout';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -11,6 +12,7 @@ function App() {
 
   return (
     <>
+    <MainLayout>
       <FileManager />
       <Toaster position="bottom-center" reverseOrder={false} />
       <button
@@ -19,6 +21,7 @@ function App() {
       >
         Sign out
       </button>
+    </MainLayout>
     </>
   )
 }

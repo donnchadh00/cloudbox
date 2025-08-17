@@ -142,15 +142,7 @@ export default function FileManager() {
   }, [])
 
   return (
-    <div className="p-4">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-6 border-b pb-2">
-        📁 File Manager
-        {userEmail && (
-          <span className="text-base font-normal text-gray-500">
-            ({userEmail})
-          </span>
-        )}
-      </h2>
+    <div className="p-4">    
       
       <FileUploader
         filesToUpload={filesToUpload}
