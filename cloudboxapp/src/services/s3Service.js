@@ -73,6 +73,22 @@ export const deleteFileFromS3 = async (fileName) => {
     return data;
 }
 
+export const getDownloadUrl = async (fileName) => {
+    const token = await getAuthToken();
+
+    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.url) throw new Error(data.error || 'Download URL fetch failed');
+    return data.url;
+};
+
 export const getFilePreviewUrl = async (fileName) => {
     const token = await getAuthToken();
     const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {

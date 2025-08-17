@@ -8,6 +8,7 @@ import {
   fetchFileList,
   uploadFileToS3,
   deleteFileFromS3,
+  getDownloadUrl,
   getFilePreviewUrl,
   getAuthToken,
 } from './services/s3Service';
@@ -84,18 +85,9 @@ export default function FileManager() {
 
   const handleDownload = async (fileName) => {
     setDownloadingFile(fileName);
-    const session = await fetchAuthSession()
-    const token = session.tokens?.idToken?.toString();
+    
     try {
-      const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-    });
-      const data = await res.json();
-      const url = data.url;
+      const url = await getDownloadUrl(fileName);
 
       const link = document.createElement('a');
       link.href = url;
