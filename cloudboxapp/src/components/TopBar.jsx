@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 
 export default function TopBar() {
   const [userEmail, setUserEmail] = useState('');
+  const { signOut } = useAuthenticator();
 
   useEffect(() => {
     const getUserEmail = async () => {
@@ -20,8 +22,16 @@ export default function TopBar() {
 
   return (
     <header className="bg-blue-600 text-white px-6 py-4 shadow-md flex justify-between items-center">
-      <h1 className="text-xl font-semibold">📁 CloudBox </h1>
-      <span className="text-sm">{userEmail}</span>
+      <h1 className="text-xl font-semibold">📁 Cloudbox</h1>
+      <div className="flex items-center gap-4">
+        <span className="text-sm hidden sm:inline">{userEmail}</span>
+        <button
+          onClick={signOut}
+          className="px-3 py-1 bg-white text-blue-600 text-sm rounded hover:bg-gray-100 transition"
+        >
+          Sign Out
+        </button>
+      </div>
     </header>
   );
 }
