@@ -3,6 +3,7 @@ import { ClipLoader } from 'react-spinners';
 import defaultFileIcon from './assets/icon-doc.svg';
 import toast from 'react-hot-toast';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { formatFileSize, formatDate } from './utils/formatters.js';
 
 const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v4/files'
 
@@ -16,20 +17,6 @@ export default function FileManager() {
   const [isDragging, setIsDragging] = useState(false);
   const [filesToUpload, setFilesToUpload] = useState([]);
   const [userEmail, setUserEmail] = useState('');
-
-function formatFileSize(bytes) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function formatDate(dateStr) {
-  const date = new Date(dateStr)
-  return date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
-}
 
   const getImagePreviewUrl = async (fileName) => {
     const session = await fetchAuthSession()
