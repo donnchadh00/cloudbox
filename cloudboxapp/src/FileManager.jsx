@@ -13,7 +13,6 @@ import {
   getAuthToken,
 } from './services/s3Service';
 import FileUploader from './features/fileManager/FileUploader.jsx';
-const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v4/files'
 
 export default function FileManager() {
   const [files, setFiles] = useState([])
