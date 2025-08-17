@@ -1,4 +1,3 @@
-import './App.css'
 import FileManager from './FileManager';
 import { Toaster } from 'react-hot-toast';
 import MainLayout from './layout/MainLaoyout';
