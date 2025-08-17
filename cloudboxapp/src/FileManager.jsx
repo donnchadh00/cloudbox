@@ -4,7 +4,13 @@ import defaultFileIcon from './assets/icon-doc.svg';
 import toast from 'react-hot-toast';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { formatFileSize, formatDate } from './utils/formatters.js';
-
+import {
+  fetchFileList,
+  uploadFileToS3,
+  deleteFileFromS3,
+  getFilePreviewUrl,
+  getAuthToken,
+} from './services/s3Service';
 const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v4/files'
 
 export default function FileManager() {
@@ -18,41 +24,11 @@ export default function FileManager() {
   const [filesToUpload, setFilesToUpload] = useState([]);
   const [userEmail, setUserEmail] = useState('');
 
-  const getImagePreviewUrl = async (fileName) => {
-    const session = await fetchAuthSession()
-    const token = session.tokens?.idToken?.toString();
-    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-    });
-    const data = await res.json();
-    return data.url;
-  };
-
   const fetchFiles = async () => {
     setLoadingList(true)
-    const session = await fetchAuthSession()
-    const token = session.tokens?.idToken?.toString();
-
-    if (!token) {
-      throw new Error('No valid auth token found');
-    }
-
-    console.log("token is: " + token)
-
     try {
-      const res = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-    });
-      const data = await res.json()
-      setFiles(data.files || [])
+      const files = await fetchFileList();
+      setFiles(files)
     } catch (err) {
       console.error('Error fetching files:', err)
       toast.error('Failed to load file list');
@@ -66,9 +42,7 @@ export default function FileManager() {
 
     let token;
     try {
-      const session = await fetchAuthSession();
-      token = session.tokens?.idToken?.toString();
-
+      token = await getAuthToken();
       if (!token) {
         throw new Error('Authentication token not found');
       }
@@ -81,33 +55,8 @@ export default function FileManager() {
 
     for (const file of filesToUpload) {
       try {
-        const reader = new FileReader();
-
-        await new Promise((resolve, reject) => {
-          reader.onloadend = async () => {
-            const base64 = reader.result.split(',')[1];
-
-            const res = await fetch(API_URL, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                fileName: file.name,
-                fileContent: base64,
-              }),
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Upload failed');
-            toast.success(`Uploaded: ${file.name}`);
-            resolve();
-          };
-
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        await uploadFileToS3(file, token);
+        toast.success(`Uploaded: ${file.name}`);
       } catch (err) {
         console.error('Error uploading:', err);
         toast.error(`Failed to upload ${file.name}`);
@@ -121,19 +70,8 @@ export default function FileManager() {
 
   const deleteFile = async (fileName) => {
     setDeletingFile(fileName)
-    const session = await fetchAuthSession()
-    const token = session.tokens?.idToken?.toString();
     try {
-      const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-    });
-
-      const data = await res.json()
-      console.log(data.message)
+      await deleteFileFromS3(fileName);
       toast.success(`Deleted ${fileName}`);
       fetchFiles()
     } catch (err) {
@@ -199,7 +137,7 @@ export default function FileManager() {
 
       const entries = await Promise.all(
         imageFiles.map(async (f) => {
-          const url = await getImagePreviewUrl(f.key);
+          const url = await getFilePreviewUrl(f.key);
           return [f.key, url];
         })
       );
