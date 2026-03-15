@@ -106,6 +106,16 @@ npm install
 npm run dev
 ```
 
+### 2a. Optional Demo Guest Sign-In
+
+The sign-in screen supports a demo account button.
+
+1. Create and confirm a Cognito user that you want to use as the shared demo account.
+2. Copy [cloudboxapp/.env.example](/home/dogriffi/projects/cloudbox/cloudboxapp/.env.example) to `cloudboxapp/.env`.
+3. Set `VITE_GUEST_EMAIL` and `VITE_GUEST_PASSWORD` to that demo user's credentials.
+
+When those env vars are present, the Amplify sign-in screen shows a `Guest Sign In` button that logs into the demo account immediately.
+
 ### 3. Set Up AWS Amplify
 
 Either run:
