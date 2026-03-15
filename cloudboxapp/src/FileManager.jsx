@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast';
-import { fetchAuthSession } from 'aws-amplify/auth';
 import {
   fetchFileList,
   uploadFileToS3,
@@ -20,7 +19,6 @@ export default function FileManager() {
   const [downloadingFile, setDownloadingFile] = useState(null);
   const [previews, setPreviews] = useState({});
   const [filesToUpload, setFilesToUpload] = useState([]);
-  const [userEmail, setUserEmail] = useState('');
 
   const fetchFiles = async () => {
     setLoadingList(true)
@@ -101,22 +99,6 @@ export default function FileManager() {
       setDownloadingFile(null);
     }
   };
-
-  useEffect(() => {
-    const getUserEmail = async () => {
-      try {
-        const session = await fetchAuthSession();
-        const email = session.tokens?.idToken?.payload?.email;
-        if (email) {
-          setUserEmail(email);
-        }
-      } catch (err) {
-        console.error('Failed to get user email:', err);
-      }
-    };
-
-    getUserEmail();
-  }, []);
 
   useEffect(() => {
     const fetchPreviews = async () => {
