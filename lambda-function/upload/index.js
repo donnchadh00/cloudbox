@@ -17,37 +17,49 @@ exports.handler = async (event) => {
 
   const bucketName = 'cloudbox-storage-donnchadh00';
   const userId = event.requestContext?.authorizer?.claims?.sub;
+  if (!userId) {
+    return {
+      statusCode: 401,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Unauthorized: user ID missing' }),
+    };
+  }
+
   const body = JSON.parse(event.body || '{}');
-  fileName = body.fileName;
-  fileContent = body.fileContent;
+  const fileName = body.fileName;
+  const contentType = body.contentType || 'application/octet-stream';
   const key = `${userId}/${fileName}`;
 
-  if (!fileName || !fileContent) {
+  if (!fileName) {
     return {
       statusCode: 400,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Missing fileName or fileContent' }),
+      body: JSON.stringify({ error: 'Missing fileName' }),
     };
   }
 
   try {  
-    await s3.putObject({
+    const uploadUrl = s3.getSignedUrl('putObject', {
       Bucket: bucketName,
       Key: key,
-      Body: Buffer.from(fileContent, 'base64'),
-      ContentType: 'application/octet-stream',
-    }).promise();
+      ContentType: contentType,
+      Expires: 60,
+    });
 
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: JSON.stringify({ message: 'File uploaded successfully!' }),
+      body: JSON.stringify({
+        uploadUrl,
+        key,
+        message: 'Upload URL created successfully!',
+      }),
     };
   } catch (err) {
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Upload failed', details: err.message }),
+      body: JSON.stringify({ error: 'Upload URL creation failed', details: err.message }),
     };
   }
 };

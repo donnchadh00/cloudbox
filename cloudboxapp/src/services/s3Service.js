@@ -26,35 +26,36 @@ export async function fetchFileList() {
 }
 
 export async function uploadFileToS3(file, token) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onloadend = async () => {
-            try {
-                const base64 = reader.result.split(',')[1];
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                        fileName: file.name,
-                        fileContent: base64,
-                    }),
-                });
-
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Upload failed');
-                resolve(data);
-            } catch (err) {
-                reject(err);
-            }
-        };
-
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+    const signedUrlResponse = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+            fileName: file.name,
+            contentType: file.type || 'application/octet-stream',
+        }),
     });
+
+    const signedUrlData = await signedUrlResponse.json();
+    if (!signedUrlResponse.ok || !signedUrlData.uploadUrl) {
+        throw new Error(signedUrlData.error || 'Could not create upload URL');
+    }
+
+    const uploadResponse = await fetch(signedUrlData.uploadUrl, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': file.type || 'application/octet-stream',
+        },
+        body: file,
+    });
+
+    if (!uploadResponse.ok) {
+        throw new Error('Direct upload to storage failed');
+    }
+
+    return signedUrlData;
 };
 
 export const deleteFileFromS3 = async (fileName) => {
