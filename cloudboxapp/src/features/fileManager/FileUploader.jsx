@@ -10,8 +10,10 @@ export default function FileUpoader({
     const [isDragging, setIsDragging] = useState(false);
 
     const isDraggingClass = (isDragging) =>
-        `border-2 border-dashed rounded p-6 flex flex-col items-center justify-center ${
-            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+        `rounded-xl border-2 border-dashed p-6 flex flex-col items-center justify-center text-center shadow-sm transition-all ${
+            isDragging
+                ? 'border-blue-500 bg-blue-50 shadow-blue-100/80'
+                : 'border-slate-300 bg-slate-50'
         }`;
 
     const handleDrop = (e) => {
@@ -35,7 +37,10 @@ export default function FileUpoader({
             }}
             className={isDraggingClass(isDragging)}
         >
-            <p className="text-sm mb-3 text-gray-600">
+            {/* <p className="text-sm font-semibold text-slate-800">
+                Drop files here
+            </p> */}
+            <p className="mt-1.5 mb-4 max-w-md text-sm leading-5 text-slate-600">
                 Drag & drop a file here or use the file picker below
             </p>
 
@@ -48,15 +53,15 @@ export default function FileUpoader({
             />
             <label
                 htmlFor="fileInput"
-                className="inline-block px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded cursor-pointer"
+                className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-100 cursor-pointer"
             >
                 Choose File
             </label>
 
             {filesToUpload.length > 0 && (
-                <ul className="mt-2 text-sm text-gray-600 list-disc list-inside">
+                <ul className="mt-3 w-full max-w-md rounded-lg border border-slate-200 bg-white/80 px-4 py-3 text-left text-sm text-slate-600 shadow-sm">
                 {filesToUpload.map((f) => (
-                    <li key={f.name}>{f.name}</li>
+                    <li key={f.name} className="truncate py-1">{f.name}</li>
                 ))}
                 </ul>
             )}
@@ -64,9 +69,9 @@ export default function FileUpoader({
             <button
                 onClick={uploadFiles}
                 disabled={!filesToUpload.length === 0 || uploading}
-                className={`mt-4 px-4 py-2 rounded text-white ${
+                className={`mt-4 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition ${
                 !files || uploading
-                    ? 'bg-gray-400 cursor-not-allowed'
+                    ? 'bg-slate-400 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
             >
