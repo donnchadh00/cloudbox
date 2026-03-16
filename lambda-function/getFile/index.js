@@ -39,7 +39,7 @@ exports.handler = async (event) => {
   try {
     const url = s3.getSignedUrl('getObject', {
       Bucket: bucketName,
-      Key: fileName,
+      Key: key,
       Expires: 60
     });
 
