@@ -15,7 +15,14 @@ export default function FileList({
      } 
      
      return (
-        <ul className="mt-6 divide-y divide-gray-200">
+        <div className="mt-6">
+            <div className="hidden md:grid md:grid-cols-[minmax(0,1fr)_180px_100px_220px] md:gap-4 md:px-2 md:pb-3 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                <span>Name</span>
+                <span>Modified</span>
+                <span>Size</span>
+                <span className="text-right">Actions</span>
+            </div>
+            <ul className="border-t border-gray-200 divide-y divide-gray-200">
             {files.map((file) => (
                 <FileItem
                     key={file.key}
@@ -27,6 +34,7 @@ export default function FileList({
                     downloadingFile={downloadingFile}
                 />
             ))}
-        </ul>
+            </ul>
+        </div>
     );
 }
