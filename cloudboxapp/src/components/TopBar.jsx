@@ -22,7 +22,19 @@ export default function TopBar() {
 
   return (
     <header className="bg-blue-600 text-white px-6 py-4 shadow-md flex justify-between items-center">
-      <h1 className="text-xl font-semibold">📁 Cloudbox</h1>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-blue-200/60">
+          <img
+            src="/cloudbox.svg"
+            alt="CloudBox logo"
+            className="h-6 w-6"
+          />
+        </div>
+        <div className="leading-tight">
+          <h1 className="text-xl font-semibold tracking-tight">CloudBox</h1>
+          <p className="text-xs text-blue-100">Secure file manager</p>
+        </div>
+      </div>
       <div className="flex items-center gap-4">
         <span className="text-sm hidden sm:inline">{userEmail}</span>
         <button
