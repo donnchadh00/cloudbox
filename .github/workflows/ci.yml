@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cloudboxapp:
+    name: Frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: cloudboxapp
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: cloudboxapp/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+        env:
+          VITE_API_URL: https://example.execute-api.eu-north-1.amazonaws.com/v4/files
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build app
+        run: npm run build
+        env:
+          VITE_API_URL: https://example.execute-api.eu-north-1.amazonaws.com/v4/files
+
+  lambda-functions:
+    name: Lambda
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: lambda-function
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: lambda-function/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
