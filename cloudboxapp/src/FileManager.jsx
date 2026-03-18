@@ -95,7 +95,6 @@ export default function FileManager() {
       toast.success('Download started');
     } catch (err) {
       console.error('Error downloading file:', err);
-      alert('Failed to download file');
       toast.error('Download failed');
     } finally {
       setDownloadingFile(null);

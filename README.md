@@ -15,6 +15,7 @@ It features a modern drag-and-drop interface, built with **React** and **Tailwin
 - Delete files from user-scoped S3 paths
 - Responsive UI with toast notifications and spinners
 - Modular architecture using reusable components, hooks, and services
+- Lightweight CI plus focused unit tests for file key and Lambda logic
 
 ---
 
@@ -139,6 +140,22 @@ amplify push
 Set the following environment variable for each Lambda handler:
 
 - `CLOUDBOX_STORAGE_BUCKET`: the S3 bucket used for file storage
+
+### 5. Validate the Project
+
+From `cloudboxapp/`:
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+From `lambda-function/`:
+
+```bash
+npm test
+```
 
 ---
 

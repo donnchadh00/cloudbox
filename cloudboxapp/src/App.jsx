@@ -1,6 +1,6 @@
 import FileManager from './FileManager';
 import { Toaster } from 'react-hot-toast';
-import MainLayout from './layout/MainLaoyout';
+import MainLayout from './layout/MainLayout';
 
 function App() {
   return (

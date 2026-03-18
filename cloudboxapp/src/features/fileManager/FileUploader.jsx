@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function FileUpoader({
+export default function FileUploader({
     filesToUpload,
     setFilesToUpload,
     uploadFiles,
@@ -36,11 +36,8 @@ export default function FileUpoader({
             }}
             className={isDraggingClass(isDragging)}
         >
-            {/* <p className="text-sm font-semibold text-slate-800">
-                Drop files here
-            </p> */}
             <p className="mt-1.5 mb-4 max-w-md text-sm leading-5 text-slate-600">
-                Drag & drop a file here or use the file picker below
+                Drag and drop files here or use the file picker below
             </p>
 
             <input
@@ -54,7 +51,7 @@ export default function FileUpoader({
                 htmlFor="fileInput"
                 className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-100 cursor-pointer"
             >
-                Choose File
+                Choose Files
             </label>
 
             {filesToUpload.length > 0 && (
