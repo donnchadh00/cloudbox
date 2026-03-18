@@ -1,6 +1,5 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
-const { getStorageBucketName } = require('../config');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,8 +15,16 @@ exports.handler = async (event) => {
       body: '' };
   }
 
-  const bucketName = getStorageBucketName();
+  const bucketName = process.env.CLOUDBOX_STORAGE_BUCKET?.trim();
   const userId = event.requestContext?.authorizer?.claims?.sub;
+
+  if (!bucketName) {
+    return {
+      statusCode: 500,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Storage bucket environment variable is not configured' }),
+    };
+  }
 
   if (!userId) {
     return {
