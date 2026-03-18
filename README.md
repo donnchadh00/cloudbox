@@ -74,7 +74,7 @@ cloudbox/
 │       ├── App.jsx
 │       ├── main.jsx
 │       ├── amplifyconfiguration.json
-│       ├── aws-exports.js
+│       ├── config/
 │       ├── components/        # UI components (TopBar, etc.)
 │       ├── features/          # FileManager logic
 │       ├── layout/            # Layout wrappers (e.g., MainLayout)
@@ -133,8 +133,6 @@ amplify add auth
 amplify add storage
 amplify push
 ```
-
-Or use your pre-configured `aws-exports.js` file.
 
 ### 4. Configure Lambda Environment
 
