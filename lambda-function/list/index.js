@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
+const previewableImagePattern = /\.(jpg|jpeg|png|gif|webp)$/i;
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
@@ -43,7 +45,14 @@ exports.handler = async (event) => {
     const fileList = data.Contents.map(item => ({
       key: item.Key,
       size: item.Size,
-      lastModified: item.LastModified
+      lastModified: item.LastModified,
+      previewUrl: previewableImagePattern.test(item.Key)
+        ? s3.getSignedUrl('getObject', {
+            Bucket: bucketName,
+            Key: item.Key,
+            Expires: 60,
+          })
+        : null,
     }));
 
     return {

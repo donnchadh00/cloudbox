@@ -6,7 +6,6 @@ import {
   deleteListedFile,
   getDisplayFileName,
   getDownloadUrlForFile,
-  getFilePreviewUrlForFile,
   getAuthToken,
 } from './services/s3Service';
 import FileUploader from './features/fileManager/FileUploader.jsx';
@@ -104,23 +103,14 @@ export default function FileManager() {
   };
 
   useEffect(() => {
-    const fetchPreviews = async () => {
-      const imageFiles = files.filter(f =>
-        f.key.match(/\.(jpg|jpeg|png|gif|webp)$/i)
-      );
-
-      const entries = await Promise.all(
-        imageFiles.map(async (f) => {
-          const url = await getFilePreviewUrlForFile(f);
-          return [f.key, url];
-        })
-      );
-
-      setPreviews(Object.fromEntries(entries));
-    };
-
     if (files.length) {
-      fetchPreviews();
+      setPreviews(
+        Object.fromEntries(
+          files
+            .filter((file) => file.previewUrl)
+            .map((file) => [file.key, file.previewUrl])
+        )
+      );
       return;
     }
 
