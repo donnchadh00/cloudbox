@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
-
-const previewableImagePattern = /\.(jpg|jpeg|png|gif|webp)$/i;
+const { mapS3ObjectToFile } = require('./logic');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,18 +41,12 @@ exports.handler = async (event) => {
       Prefix: `${userId}/`
     }).promise();
 
-    const fileList = data.Contents.map(item => ({
-      key: item.Key,
-      size: item.Size,
-      lastModified: item.LastModified,
-      previewUrl: previewableImagePattern.test(item.Key)
-        ? s3.getSignedUrl('getObject', {
-            Bucket: bucketName,
-            Key: item.Key,
-            Expires: 60,
-          })
-        : null,
-    }));
+    const fileList = data.Contents.map((item) =>
+      mapS3ObjectToFile(item, {
+        bucketName,
+        getSignedUrl: s3.getSignedUrl.bind(s3),
+      })
+    );
 
     return {
       statusCode: 200,

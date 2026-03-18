@@ -1,26 +1,11 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { apiUrl } from '../config/appConfig';
-
-function getFileKey(fileOrKey) {
-    return typeof fileOrKey === 'string' ? fileOrKey : fileOrKey.key;
-}
-
-export function getDisplayFileName(fileOrKey) {
-    const fileKey = getFileKey(fileOrKey);
-    return fileKey.split('/').pop() ?? fileKey;
-}
-
-export function getPreviewFileKey(fileOrKey) {
-    return getFileKey(fileOrKey);
-}
-
-export function getDownloadFileKey(fileOrKey) {
-    return getFileKey(fileOrKey);
-}
-
-export function getDeleteFileName(fileOrKey) {
-    return getDisplayFileName(fileOrKey);
-}
+import {
+    getDeleteFileName,
+    getDisplayFileName,
+    getDownloadFileKey,
+    getPreviewFileKey,
+} from './fileContract';
 
 export async function getAuthToken() {
     const session = await fetchAuthSession()
@@ -133,3 +118,10 @@ export const getFilePreviewUrl = async (fileName) => {
 export const getFilePreviewUrlForFile = async (fileOrKey) => {
     return getFilePreviewUrl(getPreviewFileKey(fileOrKey));
 }
+
+export {
+    getDeleteFileName,
+    getDisplayFileName,
+    getDownloadFileKey,
+    getPreviewFileKey,
+};

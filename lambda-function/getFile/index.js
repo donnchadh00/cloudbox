@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+const { getScopedFileKey } = require('./logic');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,9 +17,10 @@ exports.handler = async (event) => {
   }
 
   const bucketName = process.env.CLOUDBOX_STORAGE_BUCKET?.trim();
-  const userId = event.requestContext?.authorizer?.claims?.sub;
-  const key = decodeURIComponent(event.pathParameters?.fileName || '');
-  const userPrefix = `${userId}/`;
+  const keyResult = getScopedFileKey({
+    userId: event.requestContext?.authorizer?.claims?.sub,
+    encodedFileName: event.pathParameters?.fileName || '',
+  });
 
   if (!bucketName) {
     return {
@@ -28,34 +30,18 @@ exports.handler = async (event) => {
     };
   }
 
-  if (!userId) {
+  if (keyResult.statusCode) {
     return {
-      statusCode: 401,
+      statusCode: keyResult.statusCode,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Unauthorized: user ID missing' }),
-    };
-  }
-
-  if (!key) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Missing file name' })
-    };
-  }
-
-  if (!key.startsWith(userPrefix)) {
-    return {
-      statusCode: 403,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Forbidden: file key is outside user scope' }),
+      body: JSON.stringify(keyResult.body),
     };
   }
 
   try {
     const url = s3.getSignedUrl('getObject', {
       Bucket: bucketName,
-      Key: key,
+      Key: keyResult.key,
       Expires: 60
     });
 
