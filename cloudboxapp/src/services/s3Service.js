@@ -2,6 +2,27 @@ import { fetchAuthSession } from 'aws-amplify/auth';
 
 const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v4/files'
 
+function getFileKey(fileOrKey) {
+    return typeof fileOrKey === 'string' ? fileOrKey : fileOrKey.key;
+}
+
+export function getDisplayFileName(fileOrKey) {
+    const fileKey = getFileKey(fileOrKey);
+    return fileKey.split('/').pop() ?? fileKey;
+}
+
+export function getPreviewFileKey(fileOrKey) {
+    return getFileKey(fileOrKey);
+}
+
+export function getDownloadFileKey(fileOrKey) {
+    return getFileKey(fileOrKey);
+}
+
+export function getDeleteFileName(fileOrKey) {
+    return getDisplayFileName(fileOrKey);
+}
+
 export async function getAuthToken() {
     const session = await fetchAuthSession()
     return session.tokens?.idToken?.toString();
@@ -73,6 +94,10 @@ export const deleteFileFromS3 = async (fileName) => {
     return data;
 }
 
+export const deleteListedFile = async (fileOrKey) => {
+    return deleteFileFromS3(getDeleteFileName(fileOrKey));
+}
+
 export const getDownloadUrl = async (fileName) => {
     const token = await getAuthToken();
 
@@ -89,6 +114,10 @@ export const getDownloadUrl = async (fileName) => {
     return data.url;
 };
 
+export const getDownloadUrlForFile = async (fileOrKey) => {
+    return getDownloadUrl(getDownloadFileKey(fileOrKey));
+}
+
 export const getFilePreviewUrl = async (fileName) => {
     const token = await getAuthToken();
     const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
@@ -101,3 +130,7 @@ export const getFilePreviewUrl = async (fileName) => {
     const data = await res.json();
     return data.url;
 };
+
+export const getFilePreviewUrlForFile = async (fileOrKey) => {
+    return getFilePreviewUrl(getPreviewFileKey(fileOrKey));
+}

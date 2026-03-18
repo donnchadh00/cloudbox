@@ -1,16 +1,16 @@
 import { formatDate, formatFileSize } from '../../utils/formatters';
 import defaultFileIcon from '../../assets/icon-doc.svg';
+import { getDisplayFileName } from '../../services/s3Service';
 
 export default function FileItem({
     file,
     preview,
     onDelete,
     onDownload,
-    getFileName,
     deletingFile,
     downloadingFile,
 }) {
-    const fileName = getFileName(file.key);
+    const fileName = getDisplayFileName(file);
 
     return (
         <li className="py-3 md:grid md:grid-cols-[minmax(0,1fr)_180px_100px_220px] md:gap-4 md:items-center">
@@ -50,7 +50,7 @@ export default function FileItem({
                     <span className="ml-2 text-sm text-red-500 animate-pulse">Deleting...</span>
                 ) : (
                     <button
-                    onClick={() => onDelete(fileName)}
+                    onClick={() => onDelete(file)}
                     className="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                     >
                     Delete
@@ -61,7 +61,7 @@ export default function FileItem({
                     <span className="ml-2 text-sm text-gray-500 animate-pulse">Downloading...</span>
                 ) : (
                     <button
-                    onClick={() => onDownload(file.key)}
+                    onClick={() => onDownload(file)}
                     className="ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
                     >
                     Download

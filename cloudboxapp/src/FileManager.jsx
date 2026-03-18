@@ -3,9 +3,10 @@ import toast from 'react-hot-toast';
 import {
   fetchFileList,
   uploadFileToS3,
-  deleteFileFromS3,
-  getDownloadUrl,
-  getFilePreviewUrl,
+  deleteListedFile,
+  getDisplayFileName,
+  getDownloadUrlForFile,
+  getFilePreviewUrlForFile,
   getAuthToken,
 } from './services/s3Service';
 import FileUploader from './features/fileManager/FileUploader.jsx';
@@ -19,8 +20,6 @@ export default function FileManager() {
   const [downloadingFile, setDownloadingFile] = useState(null);
   const [previews, setPreviews] = useState({});
   const [filesToUpload, setFilesToUpload] = useState([]);
-
-  const getFileName = (key) => key.split('/').pop() ?? key;
 
   const fetchFiles = async () => {
     setLoadingList(true)
@@ -66,10 +65,11 @@ export default function FileManager() {
     fetchFiles();
   };
 
-  const deleteFile = async (fileName) => {
+  const deleteFile = async (file) => {
+    const fileName = getDisplayFileName(file);
     setDeletingFile(fileName)
     try {
-      await deleteFileFromS3(fileName);
+      await deleteListedFile(file);
       toast.success(`Deleted ${fileName}`);
       fetchFiles()
     } catch (err) {
@@ -80,12 +80,12 @@ export default function FileManager() {
     }
   }
 
-  const handleDownload = async (fileKey) => {
-    setDownloadingFile(fileKey);
+  const handleDownload = async (file) => {
+    setDownloadingFile(file.key);
     
     try {
-      const url = await getDownloadUrl(fileKey);
-      const fileName = getFileName(fileKey);
+      const url = await getDownloadUrlForFile(file);
+      const fileName = getDisplayFileName(file);
 
       const link = document.createElement('a');
       link.href = url;
@@ -111,7 +111,7 @@ export default function FileManager() {
 
       const entries = await Promise.all(
         imageFiles.map(async (f) => {
-          const url = await getFilePreviewUrl(f.key);
+          const url = await getFilePreviewUrlForFile(f);
           return [f.key, url];
         })
       );
@@ -148,7 +148,6 @@ export default function FileManager() {
         downloadingFile={downloadingFile}
         onDelete={deleteFile}
         onDownload={handleDownload}
-        getFileName={getFileName}
         loading={loadingList}
       />
 

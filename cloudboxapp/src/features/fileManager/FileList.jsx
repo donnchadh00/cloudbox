@@ -15,7 +15,6 @@ export default function FileList({
     downloadingFile,
     onDelete,
     onDownload,
-    getFileName,
     loading,
 }) {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -91,7 +90,6 @@ export default function FileList({
                     preview={previews[file.key]}
                     onDelete={onDelete}
                     onDownload={onDownload}
-                    getFileName={getFileName}
                     deletingFile={deletingFile}
                     downloadingFile={downloadingFile}
                 />
