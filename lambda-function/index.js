@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+const { getStorageBucketName } = require('./config');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,7 +9,7 @@ const corsHeaders = {
 };
 
 exports.handler = async (event) => {
-    const bucketName = 'cloudbox-storage-donnchadh00';
+    const bucketName = getStorageBucketName();
 
     try {
         console.log('Received event:', JSON.stringify(event));

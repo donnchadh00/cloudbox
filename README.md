@@ -106,13 +106,20 @@ npm install
 npm run dev
 ```
 
-### 2a. Optional Demo Guest Sign-In
+### 2a. Configure Frontend Environment
+
+Copy [cloudboxapp/.env.example](/home/dogriffi/projects/cloudbox/cloudboxapp/.env.example) to `cloudboxapp/.env` and set:
+
+- `VITE_API_URL`: your deployed API Gateway `/files` endpoint
+- `VITE_GUEST_EMAIL`: optional demo account email
+- `VITE_GUEST_PASSWORD`: optional demo account password
+
+### 2b. Optional Demo Guest Sign-In
 
 The sign-in screen supports a demo account button.
 
 1. Create and confirm a Cognito user that you want to use as the shared demo account.
-2. Copy [cloudboxapp/.env.example](/home/dogriffi/projects/cloudbox/cloudboxapp/.env.example) to `cloudboxapp/.env`.
-3. Set `VITE_GUEST_EMAIL` and `VITE_GUEST_PASSWORD` to that demo user's credentials.
+2. Set `VITE_GUEST_EMAIL` and `VITE_GUEST_PASSWORD` in `cloudboxapp/.env`.
 
 When those env vars are present, the Amplify sign-in screen shows a `Guest Sign In` button that logs into the demo account immediately.
 
@@ -128,6 +135,12 @@ amplify push
 ```
 
 Or use your pre-configured `aws-exports.js` file.
+
+### 4. Configure Lambda Environment
+
+Set the following environment variable for each Lambda handler:
+
+- `CLOUDBOX_STORAGE_BUCKET`: the S3 bucket used for file storage
 
 ---
 

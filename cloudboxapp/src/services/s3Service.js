@@ -1,6 +1,5 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
-
-const API_URL = 'https://ug5wefhwv5.execute-api.eu-north-1.amazonaws.com/v4/files'
+import { apiUrl } from '../config/appConfig';
 
 function getFileKey(fileOrKey) {
     return typeof fileOrKey === 'string' ? fileOrKey : fileOrKey.key;
@@ -34,7 +33,7 @@ export async function fetchFileList() {
         throw new Error('No valid auth token found');
     }
 
-    const res = await fetch(API_URL, {
+    const res = await fetch(apiUrl, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -46,7 +45,7 @@ export async function fetchFileList() {
 }
 
 export async function uploadFileToS3(file, token) {
-    const signedUrlResponse = await fetch(API_URL, {
+    const signedUrlResponse = await fetch(apiUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -81,7 +80,7 @@ export async function uploadFileToS3(file, token) {
 export const deleteFileFromS3 = async (fileName) => {
     const token = await getAuthToken();
 
-    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
+    const res = await fetch(`${apiUrl}/${encodeURIComponent(fileName)}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -101,7 +100,7 @@ export const deleteListedFile = async (fileOrKey) => {
 export const getDownloadUrl = async (fileName) => {
     const token = await getAuthToken();
 
-    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
+    const res = await fetch(`${apiUrl}/${encodeURIComponent(fileName)}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -120,7 +119,7 @@ export const getDownloadUrlForFile = async (fileOrKey) => {
 
 export const getFilePreviewUrl = async (fileName) => {
     const token = await getAuthToken();
-    const res = await fetch(`${API_URL}/${encodeURIComponent(fileName)}`, {
+    const res = await fetch(`${apiUrl}/${encodeURIComponent(fileName)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
