@@ -6,10 +6,11 @@ export default function FileItem({
     preview,
     onDelete,
     onDownload,
+    getFileName,
     deletingFile,
     downloadingFile,
 }) {
-    const fileName = file.key.split('/').pop();
+    const fileName = getFileName(file.key);
 
     return (
         <li className="py-3 md:grid md:grid-cols-[minmax(0,1fr)_180px_100px_220px] md:gap-4 md:items-center">
@@ -45,11 +46,11 @@ export default function FileItem({
             </div>
 
             <div className="mt-3 flex items-center gap-4 md:mt-0 md:justify-end">
-                {deletingFile === file.key ? (
+                {deletingFile === fileName ? (
                     <span className="ml-2 text-sm text-red-500 animate-pulse">Deleting...</span>
                 ) : (
                     <button
-                    onClick={() => onDelete(file.key.split('/').pop())}
+                    onClick={() => onDelete(fileName)}
                     className="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                     >
                     Delete

@@ -20,6 +20,8 @@ export default function FileManager() {
   const [previews, setPreviews] = useState({});
   const [filesToUpload, setFilesToUpload] = useState([]);
 
+  const getFileName = (key) => key.split('/').pop() ?? key;
+
   const fetchFiles = async () => {
     setLoadingList(true)
     try {
@@ -78,11 +80,12 @@ export default function FileManager() {
     }
   }
 
-  const handleDownload = async (fileName) => {
-    setDownloadingFile(fileName);
+  const handleDownload = async (fileKey) => {
+    setDownloadingFile(fileKey);
     
     try {
-      const url = await getDownloadUrl(fileName);
+      const url = await getDownloadUrl(fileKey);
+      const fileName = getFileName(fileKey);
 
       const link = document.createElement('a');
       link.href = url;
@@ -116,7 +119,12 @@ export default function FileManager() {
       setPreviews(Object.fromEntries(entries));
     };
 
-    if (files.length) fetchPreviews();
+    if (files.length) {
+      fetchPreviews();
+      return;
+    }
+
+    setPreviews({});
   }, [files]);
 
   useEffect(() => {
@@ -131,7 +139,6 @@ export default function FileManager() {
         setFilesToUpload={setFilesToUpload}
         uploadFiles={uploadFiles}
         uploading={uploading}
-        files={files}
       />
 
       <FileList
@@ -141,6 +148,7 @@ export default function FileManager() {
         downloadingFile={downloadingFile}
         onDelete={deleteFile}
         onDownload={handleDownload}
+        getFileName={getFileName}
         loading={loadingList}
       />
 

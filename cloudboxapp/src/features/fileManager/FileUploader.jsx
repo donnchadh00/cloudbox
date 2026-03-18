@@ -5,7 +5,6 @@ export default function FileUpoader({
     setFilesToUpload,
     uploadFiles,
     uploading,
-    files,
 }) {
     const [isDragging, setIsDragging] = useState(false);
 
@@ -68,9 +67,9 @@ export default function FileUpoader({
             
             <button
                 onClick={uploadFiles}
-                disabled={!filesToUpload.length === 0 || uploading}
+                disabled={filesToUpload.length === 0 || uploading}
                 className={`mt-4 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition ${
-                !files || uploading
+                filesToUpload.length === 0 || uploading
                     ? 'bg-slate-400 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}

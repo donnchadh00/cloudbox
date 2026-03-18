@@ -12,7 +12,6 @@ export async function fetchFileList() {
     if (!token) {
         throw new Error('No valid auth token found');
     }
-    console.log("token is: " + token)
 
     const res = await fetch(API_URL, {
         method: 'GET',
